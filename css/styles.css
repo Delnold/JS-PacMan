@@ -1,0 +1,32 @@
+body {
+    margin: 0;
+    background: linear-gradient(to bottom right, #000428, #004e92);
+    font-family: 'Arial', sans-serif;
+    color: white;
+    text-align: center;
+}
+
+canvas {
+    background-color: #000;
+    display: block;
+    margin: 20px auto;
+    border: 2px solid #fff;
+    box-shadow: 0 0 10px #fff;
+}
+
+#restartButton {
+    display: none;
+    margin: 20px auto;
+    padding: 10px 30px;
+    font-size: 20px;
+    background-color: #ffcc00;
+    color: #000;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#restartButton:hover {
+    background-color: #ff9900;
+}
