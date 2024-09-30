@@ -1,4 +1,4 @@
-import { astar } from './utils.js';
+import { depthSearch } from './utils.js';
 
 export default class Ghost {
     constructor(position, color, strategy, tileSize) {
@@ -10,16 +10,19 @@ export default class Ghost {
         this.lastMoveTime = 0;
     }
 
+    // Оновлює позицію привида відповідно до обраної стратегії
     update(maze, pacman, deltaTime) {
         this.lastMoveTime += deltaTime;
 
-        if (this.lastMoveTime >= 250) {
+        if (this.lastMoveTime >= 250) { // Виконує рух кожні 250 мілісекунд
             this.lastMoveTime = 0;
             let path = [];
 
             if (this.strategy === 'chase') {
-                path = astar(maze, this.x, this.y, pacman.x, pacman.y);
+                // Стратегія "переслідування" – привид рухається прямо до позиції Pacman
+                path = depthSearch(maze, this.x, this.y, pacman.x, pacman.y);
             } else if (this.strategy === 'ambush') {
+                // Стратегія "засідка" – привид намагається випередити Pacman на кілька кроків вперед
                 let targetX = pacman.x;
                 let targetY = pacman.y;
                 if (pacman.direction === 'left') targetX -= 4;
@@ -27,11 +30,13 @@ export default class Ghost {
                 else if (pacman.direction === 'right') targetX += 4;
                 else if (pacman.direction === 'down') targetY += 4;
 
+                // Враховує кордони лабіринту, щоб привид не виходив за межі
                 targetX = Math.max(0, Math.min(maze.cols - 1, targetX));
                 targetY = Math.max(0, Math.min(maze.rows - 1, targetY));
 
-                path = astar(maze, this.x, this.y, targetX, targetY);
+                path = depthSearch(maze, this.x, this.y, targetX, targetY);
             } else if (this.strategy === 'random') {
+                // Стратегія "випадковість" – рух у випадковому напрямку
                 let directions = ['left', 'up', 'right', 'down'];
                 let dir = directions[Math.floor(Math.random() * directions.length)];
                 let nextX = this.x;
@@ -44,9 +49,10 @@ export default class Ghost {
                     this.x = nextX;
                     this.y = nextY;
                 }
-                return;
+                return; // Повертаємося, оскільки випадковий рух вже виконано
             }
 
+            // Виконує рух привида, якщо знайдено шлях
             if (path.length > 1) {
                 this.x = path[1][0];
                 this.y = path[1][1];
@@ -54,6 +60,7 @@ export default class Ghost {
         }
     }
 
+    // Малює привида на полотні
     draw(ctx) {
         let centerX = this.x * this.tileSize + this.tileSize / 2;
         let centerY = this.y * this.tileSize + this.tileSize / 2;
@@ -62,13 +69,14 @@ export default class Ghost {
         ctx.fillStyle = this.color;
         ctx.beginPath();
 
-        // Ghost head
+        // Голова привида
         ctx.arc(centerX, centerY, radius, Math.PI, 0, false);
 
-        // Ghost body
+        // Тіло привида
         let baseY = centerY + radius;
         ctx.lineTo(centerX + radius, baseY);
 
+        // Ноги привида (хвилястий низ)
         let footCount = 3;
         let footWidth = (radius * 2) / (footCount * 2);
         for (let i = 0; i < footCount * 2; i++) {
@@ -81,7 +89,7 @@ export default class Ghost {
         ctx.closePath();
         ctx.fill();
 
-        // Eyes
+        // Очі привида
         ctx.fillStyle = 'white';
         ctx.beginPath();
         ctx.arc(centerX - radius / 3, centerY - radius / 3, radius / 5, 0, 2 * Math.PI);

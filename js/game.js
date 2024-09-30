@@ -25,6 +25,7 @@ export default class Game {
         this.gameLoop = this.gameLoop.bind(this);
     }
 
+    // Оновлює розміри гри відповідно до розмірів полотна
     updateDimensions() {
         this.numRows = Math.floor(this.canvas.height / this.tileSize);
         if (this.numRows % 2 === 0) this.numRows += 1;
@@ -32,12 +33,14 @@ export default class Game {
         if (this.numCols % 2 === 0) this.numCols += 1;
     }
 
+    // Починає гру: ініціалізує гру, додає слухачі подій та запускає ігровий цикл
     start() {
         this.initializeGame();
         this.addEventListeners();
         this.gameLoop(performance.now());
     }
 
+    // Ініціалізує нову гру, налаштовує об'єкти лабіринту, Pacman та привидів
     initializeGame() {
         this.updateDimensions();
         this.maze = new Maze(this.numRows, this.numCols, this.tileSize);
@@ -56,6 +59,7 @@ export default class Game {
         this.lastTime = performance.now();
     }
 
+    // Додає слухачі подій для клавіш і кнопки перезапуску
     addEventListeners() {
         if (!this.listenersAdded) {
             document.addEventListener('keydown', this.handleKeydown);
@@ -64,17 +68,20 @@ export default class Game {
         }
     }
 
+    // Видаляє слухачі подій для клавіш і кнопки перезапуску
     removeEventListeners() {
         document.removeEventListener('keydown', this.handleKeydown);
         this.restartButton.removeEventListener('click', this.handleRestart);
         this.listenersAdded = false;
     }
 
+    // Обробляє події натискання клавіш для керування напрямком Pacman
     handleKeydown(e) {
         this.keys[e.key] = true;
         this.pacman.changeDirection(e.key);
     }
 
+    // Обробляє перезапуск гри, зберігає прогрес та запускає новий рівень
     handleRestart() {
         if (this.maze.isAllDotsCollected()) {
             this.level += 1;
@@ -84,6 +91,7 @@ export default class Game {
         this.start();
     }
 
+    // Основний ігровий цикл: оновлює стан гри та малює її на екрані
     gameLoop(currentTime) {
         let deltaTime = currentTime - this.lastTime;
         this.lastTime = currentTime;
@@ -101,6 +109,7 @@ export default class Game {
         }
     }
 
+    // Оновлює стан всіх об'єктів у грі, зокрема Pacman та привидів
     update(deltaTime) {
         this.pacman.update(this.maze, deltaTime);
 
@@ -116,6 +125,7 @@ export default class Game {
         }
     }
 
+    // Перевіряє наявність зіткнень між Pacman і привидами
     checkCollisions() {
         this.ghosts.forEach(ghost => {
             if (ghost.x === this.pacman.x && ghost.y === this.pacman.y) {
@@ -124,12 +134,14 @@ export default class Game {
         });
     }
 
+    // Оновлює рахунок гравця, якщо Pacman з'їдає крапку
     updateScore() {
         if (this.maze.collectDot(this.pacman.x, this.pacman.y)) {
             this.score += 10;
         }
     }
 
+    // Малює всі об'єкти гри на полотні
     draw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.maze.draw(this.ctx, this.tileSize);
@@ -140,12 +152,14 @@ export default class Game {
         this.drawScore();
     }
 
+    // Малює рахунок гравця на екрані
     drawScore() {
         this.ctx.fillStyle = 'white';
         this.ctx.font = '20px Arial';
         this.ctx.fillText('Score: ' + this.score, 10, this.canvas.height - 10);
     }
 
+    // Малює екран "Кінець гри" або "Ви перемогли" та показує високі результати
     drawGameOver() {
         this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
@@ -174,6 +188,7 @@ export default class Game {
         });
     }
 
+    // Оновлює високі результати і зберігає їх у локальне сховище
     updateHighScores() {
         this.highScores.push(this.score);
         this.highScores.sort((a, b) => b - a);

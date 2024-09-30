@@ -11,6 +11,7 @@ export default class Maze {
         this.createOffscreenCanvas();
     }
 
+    // Створює офлайн-полотно (offscreen canvas) для зберігання статичних частин лабіринту
     createOffscreenCanvas() {
         this.offscreenCanvas = document.createElement('canvas');
         this.offscreenCanvas.width = this.cols * this.tileSize;
@@ -19,8 +20,9 @@ export default class Maze {
         this.drawStaticMaze();
     }
 
+    // Малює статичні частини лабіринту, такі як стіни, на офлайн-полотні
     drawStaticMaze() {
-        // Walls on the off-screen canvas
+        // Малює стіни на офлайн-полотні
         for (let y = 0; y < this.rows; y++) {
             for (let x = 0; x < this.cols; x++) {
                 if (this.grid[y][x] === 1) {
@@ -31,7 +33,7 @@ export default class Maze {
                         this.tileSize,
                         this.tileSize
                     );
-                    // Border for walls
+                    // Малює контур стін
                     this.offscreenCtx.strokeStyle = '#000099';
                     this.offscreenCtx.strokeRect(
                         x * this.tileSize,
@@ -44,8 +46,9 @@ export default class Maze {
         }
     }
 
+    // Генерує структуру лабіринту з проходами і стінами
     generateMaze() {
-        // Initialize grid with walls and passages
+        // Ініціалізує сітку лабіринту стінами та проходами
         for (let y = 0; y < this.rows; y++) {
             this.grid[y] = [];
             for (let x = 0; x < this.cols; x++) {
@@ -54,82 +57,86 @@ export default class Maze {
                     x === this.rows - 1 ||
                     y === 0 ||
                     y === this.cols - 1
-
                 ) {
-                    this.grid[y][x] = 1; // Border cells are walls
+                    this.grid[y][x] = 1; // Граничні клітинки — це стіни
                 } else if (x % 2 === 1 && y % 2 === 1) {
-                    this.grid[y][x] = 0; // Passages at odd indices
+                    this.grid[y][x] = 0; // Проходи в непарних індексах
                 } else {
-                    this.grid[y][x] = 1; // Walls
+                    this.grid[y][x] = 1; // Стіни
                 }
             }
         }
 
-        // Connect the passages to form a simple grid
+        // Створює прості проходи у вигляді сітки
         for (let y = 1; y < this.rows - 1; y += 2) {
             for (let x = 1; x < this.cols - 1; x += 2) {
-                // Open a passage to the right
+                // Створює прохід направо
                 if (x < this.cols - 2) {
                     this.grid[y][x + 1] = 0;
                 }
-                // Open a passage downward
+                // Створює прохід вниз
                 if (y < this.rows - 2) {
                     this.grid[y + 1][x] = 0;
                 }
             }
         }
 
-        // Dots
+        // Додає точки (крапки) у проходи
         for (let y = 1; y < this.rows - 1; y++) {
             for (let x = 1; x < this.cols - 1; x++) {
                 if (this.grid[y][x] === 0) {
-                    this.grid[y][x] = 2; // Passage with a dot
+                    this.grid[y][x] = 2; // Проходи з точками
                 }
             }
         }
     }
 
+    // Перевіряє, чи є клітинка стіною
     isWall(x, y) {
         return this.grid[y] && this.grid[y][x] === 1;
     }
 
+    // Збирає точку, якщо Pacman знаходиться на ній
     collectDot(x, y) {
         if (this.grid[y] && this.grid[y][x] === 2) {
-            this.grid[y][x] = 0; // Remove the dot
+            this.grid[y][x] = 0; // Видаляє точку
             return true;
         }
         return false;
     }
 
+    // Перевіряє, чи зібрані всі точки у лабіринті
     isAllDotsCollected() {
         for (let y = 1; y < this.rows - 1; y++) {
             for (let x = 1; x < this.cols - 1; x++) {
                 if (this.grid[y][x] === 2) {
-                    return false;
+                    return false; // Є ще точки для збору
                 }
             }
         }
-        return true;
+        return true; // Всі точки зібрані
     }
 
+    // Знаходить вільну позицію для Pacman або привида
     findFreePosition() {
         let x, y;
         do {
             x = Math.floor(Math.random() * ((this.cols - 2) / 2)) * 2 + 1;
             y = Math.floor(Math.random() * ((this.rows - 2) / 2)) * 2 + 1;
-        } while (this.grid[y][x] !== 2);
+        } while (this.grid[y][x] !== 2); // Перевіряє, щоб вибрана позиція містила точку
         return { x, y };
     }
 
+    // Малює лабіринт на основному полотні
     draw(ctx, tileSize) {
         for (let y = 0; y < this.rows; y++) {
             for (let x = 0; x < this.cols; x++) {
                 if (this.grid[y][x] === 1) {
-                    // Draw wall
+                    // Малює стіну
                     ctx.fillStyle = '#0033cc';
                     ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
 
-                    // Optional border
+                    // Опціональний контур для стіни
                     ctx.strokeStyle = '#000099';
                     ctx.strokeRect(
                         x * tileSize,
@@ -138,11 +145,11 @@ export default class Maze {
                         tileSize
                     );
                 } else {
-                    // Draw passage
+                    // Малює прохід
                     ctx.fillStyle = 'black';
                     ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
 
-                    // Draw dots
+                    // Малює точку (якщо є)
                     if (this.grid[y][x] === 2) {
                         ctx.fillStyle = 'white';
                         ctx.beginPath();
